@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpendWise — Gestor de Gastos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">SpendWise</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-view="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" data-view="expenses">
+      <svg viewBox="0 0 24 24"><path d="M2 7h20M6 12h12M10 17h4"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+      Gastos
+    </a>
+    <a class="nav-item" data-view="income">
+      <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Ingresos
+    </a>
+    <a class="nav-item" data-view="budgets">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Presupuestos
+    </a>
+  </nav>
+
+  <div class="sidebar-month">
+    <label>Período</label>
+    <input type="month" id="globalMonth" />
+  </div>
+</aside>
+
+<!-- ── Mobile header ──────────────────────────────────────────── -->
+<header class="mobile-header">
+  <button class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </button>
+  <span class="brand-name-sm">◈ SpendWise</span>
+  <button class="btn-add-mobile" id="btnAddMobile">+</button>
+</header>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ── Main content ───────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- ═══ DASHBOARD ═══════════════════════════════════════════ -->
+  <section class="view active" id="view-dashboard">
+    <div class="view-header">
+      <h1 class="view-title">Dashboard</h1>
+      <button class="btn-primary" id="btnAddExpense">+ Nuevo gasto</button>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-income">
+        <div class="kpi-label">Ingresos del mes</div>
+        <div class="kpi-value" id="kpiIncome">$0.00</div>
+        <div class="kpi-sub">Total acumulado</div>
+      </div>
+      <div class="kpi-card kpi-expenses">
+        <div class="kpi-label">Gastos del mes</div>
+        <div class="kpi-value" id="kpiExpenses">$0.00</div>
+        <div class="kpi-sub">Total gastado</div>
+      </div>
+      <div class="kpi-card kpi-balance">
+        <div class="kpi-label">Balance</div>
+        <div class="kpi-value" id="kpiBalance">$0.00</div>
+        <div class="kpi-sub">Disponible</div>
+      </div>
+      <div class="kpi-card kpi-savings">
+        <div class="kpi-label">Tasa de ahorro</div>
+        <div class="kpi-value" id="kpiSavings">0%</div>
+        <div class="kpi-sub">Del total ingresado</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-grid">
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>Tendencia 6 meses</h3>
+        </div>
+        <canvas id="trendChart" height="200"></canvas>
+      </div>
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>Por categoría</h3>
+        </div>
+        <canvas id="donutChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Category breakdown -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Desglose por categoría</h3>
+      </div>
+      <div id="categoryBreakdown" class="category-list"></div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Transacciones recientes</h3>
+        <a class="link-sm" data-view="expenses">Ver todas →</a>
+      </div>
+      <div id="recentTransactions" class="transaction-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══ GASTOS ════════════════════════════════════════════════ -->
+  <section class="view" id="view-expenses">
+    <div class="view-header">
+      <h1 class="view-title">Gastos</h1>
+      <button class="btn-primary" id="btnAddExpense2">+ Nuevo gasto</button>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <select id="filterCategory">
+          <option value="">Todas las categorías</option>
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.icon }} {{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="expensesList" class="transaction-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══ INGRESOS ══════════════════════════════════════════════ -->
+  <section class="view" id="view-income">
+    <div class="view-header">
+      <h1 class="view-title">Ingresos</h1>
+      <button class="btn-primary" id="btnAddIncome">+ Nuevo ingreso</button>
+    </div>
+    <div class="card">
+      <div id="incomeList" class="transaction-list"></div>
+    </div>
+  </section>
+
+  <!-- ═══ PRESUPUESTOS ══════════════════════════════════════════ -->
+  <section class="view" id="view-budgets">
+    <div class="view-header">
+      <h1 class="view-title">Presupuestos</h1>
+    </div>
+    <div class="budgets-grid" id="budgetsGrid"></div>
+  </section>
+
+</main>
+
+<!-- ── Modals ──────────────────────────────────────────────────── -->
+
+<!-- Expense modal -->
+<div class="modal-backdrop" id="expenseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="expenseModalTitle">Nuevo gasto</h2>
+      <button class="modal-close" data-close="expenseModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="expenseId" />
+      <div class="form-group">
+        <label>Monto ($)</label>
+        <input type="number" id="expenseAmount" placeholder="0.00" step="0.01" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <input type="text" id="expenseDesc" placeholder="¿En qué gastaste?" />
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <div class="category-picker" id="categoryPicker">
+          {% for c in categories %}
+          <button class="cat-btn" data-id="{{ c.id }}" type="button">
+            <span class="cat-icon">{{ c.icon }}</span>
+            <span class="cat-label">{{ c.name }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="expenseDate" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="expenseModal">Cancelar</button>
+      <button class="btn-primary" id="saveExpense">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Income modal -->
+<div class="modal-backdrop" id="incomeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Nuevo ingreso</h2>
+      <button class="modal-close" data-close="incomeModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Monto ($)</label>
+        <input type="number" id="incomeAmount" placeholder="0.00" step="0.01" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Fuente</label>
+        <input type="text" id="incomeSource" placeholder="Salario, freelance, etc." />
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="incomeDate" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="incomeModal">Cancelar</button>
+      <button class="btn-primary" id="saveIncome">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Budget modal -->
+<div class="modal-backdrop" id="budgetModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="budgetModalTitle">Establecer presupuesto</h2>
+      <button class="modal-close" data-close="budgetModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="budgetCat" />
+      <div class="form-group">
+        <label>Categoría</label>
+        <input type="text" id="budgetCatName" readonly />
+      </div>
+      <div class="form-group">
+        <label>Presupuesto mensual ($)</label>
+        <input type="number" id="budgetAmount" placeholder="0.00" step="0.01" min="0" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" data-close="budgetModal">Cancelar</button>
+      <button class="btn-primary" id="saveBudget">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
