@@ -1,11 +1,11 @@
-# 💸 SpendWise — Gestor de Gastos Personales
+# SpendWise — Gestor de Gastos Personales
 
 Aplicación web moderna para gestionar tus gastos, ingresos y presupuestos personales.
 Construida con Python + Flask + SQLite.
 
 ---
 
-## 🚀 Configuración rápida
+## Configuración rápida
 
 ### 1. Requisitos
 - Python 3.9 o superior
@@ -47,7 +47,7 @@ expense-manager/
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 | Sección        | Descripción |
 |---------------|-------------|
@@ -61,7 +61,7 @@ expense-manager/
 
 ---
 
-## 🛠 API Endpoints
+## API Endpoints
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -78,7 +78,7 @@ expense-manager/
 
 ---
 
-## 🔧 Extensiones posibles
+## Extensiones posibles
 
 - Exportar a CSV/Excel
 - Múltiples usuarios con autenticación
@@ -88,7 +88,7 @@ expense-manager/
 
 ---
 
-## 💻 Tecnologías
+## Tecnologías
 
 - **Backend:** Python, Flask, SQLite
 - **Frontend:** HTML5, CSS3 (custom), Vanilla JS
